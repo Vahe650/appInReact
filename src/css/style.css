@@ -1,0 +1,9 @@
+.App{
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+.font{
+    font-size: 50px;
+    color: plum;
+}
