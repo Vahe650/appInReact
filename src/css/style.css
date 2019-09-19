@@ -10,3 +10,7 @@
 .border{
     border: solid;
 }
+.redColor{
+    color: white;
+    background-color:red;
+}

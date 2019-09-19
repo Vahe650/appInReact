@@ -1,16 +1,37 @@
 import React, {Component} from 'react';
 import './css/style.css'
+import './css/bootstrap.min.css'
 import NavBar from "./components/navBar";
 
 // import Home from "./components/home";
 
+function Employeers(props) {
+    var classes = '';
+    if (props.posts.degree === 'SENIOR') {
+        classes = 'redColor'
+    }
+    const content =
+        <tr className={classes} onClick={props.onMark}>
+            <td>{props.posts.id}</td>
+            <td>{props.posts.name}</td>
+            <td>{props.posts.surname}</td>
+            <td>{props.posts.degree}</td>
+            <td>{props.posts.tasks.length}</td>
+
+
+        </tr>
+
+    return (content)
+}
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
             loading: false,
-            employee: []
+            employee: [],
+            visible: true,
+            appTitle: 'React'
         };
     }
 
@@ -20,56 +41,119 @@ class App extends Component {
             .then(json => {
                 this.setState({
                     loading: true,
-                    employee: json
+                    employee: json,
+                    visible: true
                 })
             })
     }
 
+    handleMArked(id) {
+        const empls = this.state.employee.concat()
+        var find = empls.find(empl => empl.id === id);
+        if (find.degree === 'SENIOR') {
+            find.degree = 'MIDDLE'
+        } else {
+            find.degree = 'SENIOR'
+        }
+
+        this.setState({
+            loading: true,
+            employee: empls,
+            visible: true
+        })
+
+
+    }
+
+
+    carRender() {
+        var id;
+        var posts
+        this.state.employee.forEach((empl) => {
+                id = empl.id + 1
+                posts = {id: id, name: 'namer' + id, surname: 'asdasd', degree: 'MIDDLE', tasks: []}
+            }
+        )
+        if (!this.state.visible) {
+            return null;
+        }
+
+        this.state.employee.push(posts)
+        return this.state.employee.map((empl) => {
+            return (
+                <Employeers key={empl.id} posts={empl} onMark={this.handleMArked.bind(this, empl.id)}/>
+            )
+        })
+
+    }
+
+    toggleHandler() {
+        console.log('it works');
+        this.setState({visible: !this.state.visible})
+    }
+
+    titleChangeHandler(title) {
+        if (title.trim() === '') {
+            title = 'React'
+        }
+        this.setState({
+            appTitle: title
+        })
+
+    }
+
+    searchHandler(name) {
+        var rows = document.getElementById('myTable').childNodes;
+        rows.forEach(row => {
+            if (row.childNodes[1].innerText.toUpperCase().startsWith(name.toUpperCase())) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        })
+
+
+    }
 
     render() {
 
-        function Car(props) {
-            const content = props.posts.map((post) =>
-                <tr key={post.id}>
-                    <td>{post.id}</td>
-                    <td>{post.name}</td>
-                    <td>{post.surname}</td>
-                </tr>
-            );
-            return (content)
-        }
 
         var {loading, employee} = this.state;
-        var posts = [{id: '11', name: 'namer', surname: 'asdasd'}];
-
+        var style = {marginLeft: '50px'}
         return (
-            <div>
+            <div className={'container'}>
+                <h1>{this.state.appTitle}</h1>
                 <div className="App">
                     <NavBar title="Employers"/>
                 </div>
+                <div>
+                    <button onClick={() => this.toggleHandler()}> Toggle</button>
+                    <input style={style} value={this.state.appTitle} type='text'
+                           onChange={(event) => this.titleChangeHandler(event.target.value)} placeholder={'name'}/>
+                    <input style={style} type='text'
+                           onChange={(event) => this.searchHandler(event.target.value)} placeholder={'search'}/>
+                </div>
 
-                <table className="App">
-                    {!loading ? (
+
+                {!this.state.loading ? <h1>loading...</h1> :
+                    <table className="table">
                         <thead>
                         <tr>
-                            <th>loading...</th>
+                            <th>id</th>
+                            <th>name</th>
+                            <th>surname</th>
+                            <th>degree</th>
+                            <th>tasks QTY</th>
                         </tr>
                         </thead>
-                    ) : <tbody className={'border'}>
-                    {employee.map((empl) =>
-
-                        <tr key={empl.id} className={'border'}>
-                            <td>{empl.id}</td>
-                            <td>{empl.name}</td>
-                            <td>{empl.surname}</td>
-                        </tr>
-                    )}
-                    <Car posts={posts}/>
-                    </tbody>}
-                </table>
+                        <tbody id="myTable" className={'border'}>
+                        {this.carRender()}
+                        </tbody>
+                    </table>}
             </div>
         );
     }
+
 
 }
 
